@@ -1,0 +1,48 @@
+<head>
+  <title>Oficina_2</title>
+  <meta content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=no" name="viewport">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+
+<body>
+  <div class="container">
+    <h1>Oficina - Playlist Colaborativa</h1>
+  </div>
+</body>
+
+<template name="MainPage">
+  <div class="container">
+    <form class="new_video" autocomplete="off">
+      <div class="row">
+        <div class="col s12 m12 l9">
+          <div class="input-field">
+            <input type="text" name="link" class="validate" id="text_field"><br>
+            <label for="link">O que você gostaria de ouvir?</label>
+          </div>
+        </div>
+        <div class="col s12 center m12 center l3" style="margin-top:20px">
+          <button class="btn waves-effect waves-light text-center" type="submit" value="Submit" id="submit" href=".modal">Procurar
+          <i class="material-icons right">search</i>
+        </button>
+        </div>
+      </div>
+    </form>
+    <ul class="collection">
+      {{#each videos}}
+      <li class="collection-item avatar">
+        <img src={{videoThumb}} alt="" class="circle">
+        <div style="width:90%">
+          <span class="title">{{videoTitle}}</span>
+        </div>
+        <p>{{videoDuration}}<br>{{videoStatus}}
+        </p>
+        <a href="" class="secondary-content"><i class="material-icons">queue_music</i></a>
+      </li>
+      {{/each}}
+    </ul>
+  </div>
+</template>
+
+<template name="player">
+  <div id="player"></div>
+</template>

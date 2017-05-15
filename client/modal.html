@@ -1,0 +1,18 @@
+<template name="List">
+    <div>
+        <h6 class="center-align">
+            Qual delas você deseja escutar ?
+        </h6>
+    </div>
+    <ul class="collection">
+        {{#each lista}}
+        <li class="collection-item avatar">
+            <img src={{videoThumb}} alt="" class="circle">
+            <div style="width:90%">
+                <span class="title" style="font-size:14px">{{videoTitle}}</span>
+            </div>
+            <a href="" class="secondary-content"><i class="material-icons" id = {{listNumber}}>playlist_add</i></a>
+        </li>
+        {{/each}}
+    </ul>
+</template>

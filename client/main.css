@@ -1,0 +1,14 @@
+/* CSS declarations go here */
+
+body {
+    justify-content: center;
+}
+
+#submit {
+    margin-left: auto;
+    text-align: center;
+}
+
+submit .new_video {
+    background-color: yellow;
+}
