@@ -11,14 +11,8 @@ import {
 import './main.html';
 
 Videos = new Mongo.Collection('videos');
-SearchListEx = [{
-
-  "videoTitle": "Titulo",
-  "videoStatus": "ALAAL",
-  "videoDuration": "3:00"
-
-}]
-
+Reactions = new Mongo.Collection('reactions');
+//GLOBAL ARRAYS
 SearchList = new Array();
 // GLOBAL FUNCTIONS
 
@@ -42,40 +36,46 @@ insertVideo = function (videoId, videoTitle, videoThumb) {
     videoId: videoId,
     videoTitle: videoTitle,
     videoThumb: videoThumb,
-    videoStatus: "Na fila"
+    videoStatus: "Na fila",
+    videoLike: 0,
+    videoDislike: 0,
   }, function (error) {
     if (error) {
       //Duplicate music error
       Materialize.toast('Está musica já está na playlist!', 3000, 'red');
     } else {
-      Materialize.toast('Musica inserida!', 2000, 'green');
-    }
-  })
-
-  //Get video duration
-  var ytresponse_video = HTTP.call('GET', 'https://www.googleapis.com/youtube/v3/videos?id=' + videoId + '&part=contentDetails&key=AIzaSyBQ42sEnmmjDafk7UCL4LqUbqbFwyaJpgk', {
-    params: {}
-  }, function (error, response) {
-    if (error) {
-      alert("Error while searching.");
-    } else {
-      //Json manipulation
-      var parsed = JSON.parse(response.content);
-      var videoDuration = convertDuration(parsed.items[0].contentDetails.duration);
-      // Update
-      Videos.update({
-        _id: videoId
-      }, {
-        $set: {
-          videoDuration: videoDuration,
-        }
-      }, function (error) {
+      //Get video duration
+      var ytresponse_video = HTTP.call('GET', 'https://www.googleapis.com/youtube/v3/videos?id=' + videoId + '&part=contentDetails&key=AIzaSyBQ42sEnmmjDafk7UCL4LqUbqbFwyaJpgk', {
+        params: {}
+      }, function (error, response) {
         if (error) {
-          console.log(error)
+          alert("Error while searching.");
+        } else {
+          //Json manipulation
+          var parsed = JSON.parse(response.content);
+          var videoDuration = convertDuration(parsed.items[0].contentDetails.duration);
+          if (videoDuration.split(":")[0] < 10) {
+            // Update
+            Videos.update({
+              _id: videoId
+            }, {
+              $set: {
+                videoDuration: videoDuration,
+              }
+            }, function (error) {
+              if (error) {
+                console.log(error)
+              }
+            })
+            Materialize.toast('Musica inserida!', 2000, 'green');
+          } else {
+            Videos.remove(videoId);
+            Materialize.toast('Duração excessiva!', 3000, 'red');
+          }
         }
       })
     }
-  })
+  });
 }
 
 //HELPERS
@@ -84,7 +84,22 @@ Template.MainPage.helpers({
   //Return all videos on database
 
   videos: function () {
-    return Videos.find();
+    json_videos = Videos.find().fetch();
+    json_videos.forEach(function (element, index) {
+      //for likes
+      if (Meteor.user().profile.likes.indexOf(element._id) != -1) {
+        json_videos[index].like = true;
+      } else {
+        json_videos[index].like = false;
+      }
+      //for dislikes
+      if (Meteor.user().profile.dislikes.indexOf(element._id) != -1) {
+        json_videos[index].dislike = true;
+      } else {
+        json_videos[index].dislikes = false;
+      }
+    });
+    return json_videos;
   }
 });
 
@@ -98,9 +113,9 @@ Template.MainPage.events({
       Materialize.toast('Campo de pesquisa vazio!', 3000, 'red');
       return false;
     } else {
-      // get 20 videos
       MaterializeModal.loading()
-      var ytresponse_search = HTTP.call('GET', 'https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=20&type=video&order=viewCount&q=' + search + '&key=AIzaSyBQ42sEnmmjDafk7UCL4LqUbqbFwyaJpgk', {
+      // get 10 videos
+      var ytresponse_search = HTTP.call('GET', 'https://www.googleapis.com/youtube/v3/search?part=snippet&maxResults=10&type=video&order=viewCount&q=' + search + '&key=AIzaSyBQ42sEnmmjDafk7UCL4LqUbqbFwyaJpgk', {
         params: {}
       }, function (error, response) {
         if (error) {
@@ -109,29 +124,128 @@ Template.MainPage.events({
         } else {
           //json manipulation...
           var parsed = JSON.parse(response.content);
-          // populate array
-          for (i = 0; i < 20; i++) {
-            var videoId = parsed.items[i].id.videoId;
-            var videoThumb = parsed.items[i].snippet.thumbnails.medium.url;
-            var videoTitle = parsed.items[i].snippet.title;
-            if (videoTitle.length > 70) videoTitle = videoTitle.substring(0, 70) + '...';
-            SearchList.push({
-              "listNumber": i,
-              "videoId": videoId,
-              "videoTitle": videoTitle,
-              "videoThumb": videoThumb
-            })
+          if (parsed.items.length >= 10) {
+            for (i = 0; i < 10; i++) {
+              "fa fa-thumbs-up fa-2x"
+              // populate array
+              var videoId = parsed.items[i].id.videoId;
+              var videoThumb = parsed.items[i].snippet.thumbnails.medium.url;
+              var videoTitle = parsed.items[i].snippet.title;
+              if (videoTitle.length > 50) videoTitle = videoTitle.substring(0, 50) + '...';
+              SearchList.push({
+                "listNumber": i,
+                "videoId": videoId,
+                "videoTitle": videoTitle,
+                "videoThumb": videoThumb
+              })
+            }
+            //show modal
+            MaterializeModal.display({
+              bodyTemplate: 'List',
+              closeLabel: 'Fechar'
+            });
+          } else {
+            Materialize.toast('Pesquisa inválida. Tente outro termo para a pesquisa.', 3000, 'red');
+            MaterializeModal.close();
           }
-          //show modal
-          MaterializeModal.display({
-            bodyTemplate: 'List'
-          });
         }
       })
       //clean target value and array
       event.target.title.value = "";
       SearchList = [];
       return false;
+    }
+  },
+  'click #like': function (event) {
+    reaction = $("#" + event.target.id).attr("class")
+    if (reaction == "fa fa-thumbs-up fa-2x") {
+      //like off
+      url = event.target.id.substring(1);
+      //update like counter
+      Videos.update({
+        _id: url
+      }, {
+        $inc: {
+          'videoLike': -1
+        }
+      }, true);
+      // update like array
+      Meteor.users.update({
+        _id: Meteor.user()._id,
+      }, {
+        $pull: {
+          "profile.likes": url,
+        }
+      }, function (error) {
+        if (error) console.log(error);
+      });
+    } else {
+      //like on
+      url = event.target.id.substring(1);
+      //update like counter
+      Videos.update({
+        _id: url
+      }, {
+        $inc: {
+          'videoLike': 1
+        }
+      }, true);
+      //update like array
+      Meteor.users.update({
+        _id: Meteor.user()._id,
+      }, {
+        $push: {
+          "profile.likes": url
+        }
+      }, function (error) {
+        if (error);
+      });
+    }
+  },
+  'click #dislike': function (event) {
+    reaction = $("#" + event.target.id).attr("class")
+    if (reaction == "fa fa-thumbs-down fa-2x") {
+      //dislike off      
+      url = event.target.id.substring(1);
+      //update dislike counter
+      Videos.update({
+        _id: url
+      }, {
+        $inc: {
+          'videoDislike': -1
+        }
+      }, true);
+      //update dislike array
+      Meteor.users.update({
+        _id: Meteor.user()._id,
+      }, {
+        $pull: {
+          "profile.dislikes": url
+        }
+      }, function (error) {
+        if (error);
+      });
+    } else {
+      //dislike on
+      url = event.target.id.substring(1);
+      //update dislike counter
+      Videos.update({
+        _id: url
+      }, {
+        $inc: {
+          'videoDislike': 1
+        }
+      }, true);
+      //update dislike array
+      Meteor.users.update({
+        _id: Meteor.user()._id,
+      }, {
+        $push: {
+          "profile.dislikes": url
+        }
+      }, function (error) {
+        if (error);
+      });
     }
   }
 });

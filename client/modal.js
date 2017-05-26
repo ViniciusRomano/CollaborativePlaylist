@@ -15,7 +15,6 @@ Template.List.helpers({
         return SearchList;
     }
 });
-
 Template.List.events({
     'click .secondary-content': function (event, template) {
         MaterializeModal.confirm({
@@ -25,17 +24,26 @@ Template.List.events({
             submitLabel: "Confirmar",
             closeLabel: "Cancelar",
             callback: function (error, response) {
-                if (response.submit) {
+                if (error) {
+                    MaterializeModal.close();
+                    Materialize.toast('Ocorreu um erro, por favor selecione a música novamente.', 3000, 'red');
+                } else if (response.submit) {
                     var Video = SearchList[event.target.id];
                     insertVideo(Video.videoId, Video.videoTitle, Video.videoThumb);
                     MaterializeModal.close();
                 } else {
-                    //Back to List
                     setTimeout(function () {
                         MaterializeModal.display({
-                            bodyTemplate: 'List'
+                            bodyTemplate: 'List',
+                            closeLabel: 'Fechar'
                         });
                     }, 500);
+                    setTimeout(function () {
+                        MaterializeModal.display({
+                            bodyTemplate: 'List',
+                            closeLabel: 'Fechar'
+                        });
+                    }, 1500);
                 }
             }
         });

@@ -4,8 +4,13 @@ import {
 
 Videos = new Mongo.Collection('videos');
 
+
 Meteor.startup(() => {
   // code to run on server at startup
   // Clean database
+  Meteor.users.remove({})
+  Accounts.removeOldGuests();;
+  AccountsGuest.anonymous = true
+  AccountsGuest.name = true
   Videos.remove({});
 });
