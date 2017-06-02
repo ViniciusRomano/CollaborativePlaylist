@@ -39,6 +39,7 @@ insertVideo = function (videoId, videoTitle, videoThumb) {
     videoStatus: "Na fila",
     videoLike: 0,
     videoDislike: 0,
+    videoPercent: 1
   }, function (error) {
     if (error) {
       //Duplicate music error
@@ -152,6 +153,7 @@ Template.MainPage.events({
       })
       //clean target value and array
       event.target.title.value = "";
+      document.getElementById("text_field").value = "";
       SearchList = [];
       return false;
     }
@@ -247,14 +249,22 @@ Template.MainPage.events({
         if (error);
       });
     }
+  },
+});
+
+Template.body.events({
+  'click #nav-mobile': function (event) {
+    MaterializeModal.display({
+      bodyTemplate: 'Helpme',
+      closeLabel: 'Fechar'
+    });
   }
 });
 
 //PLAYER
 
 window.onYouTubeIframeAPIReady = function () {
-
-  // Catch first video
+  //First video
   var Id = Videos.findOne()
 
   if (!Id) {
@@ -290,27 +300,43 @@ window.onYouTubeIframeAPIReady = function () {
         // Ended Video
         if (event.data == YT.PlayerState.ENDED) {
           // Remove video on database
-          Videos.remove({
-            _id: Id._id
-          })
-          // Search new video
-          Id = Videos.findOne()
-          // Database empty
-          if (!Id) {
-            Id = ({
-              videoId: "DID8g3sleTs"
-            });
-          } else {
-            // Update video status
-            Videos.update({
+          if (Id.videoId != "DID8g3sleTs") {
+            Videos.remove({
               _id: Id._id
-            }, {
-              $set: {
-                videoStatus: "Tocando"
-              }
-            });
+            })
           }
+
+          // Search new video
+          var label = false;
+          do {
+            Id = Videos.findOne()
+            var percent = 1;
+            if (Id != undefined) {
+              if (!(Id.videoDislike == 0 && Id.videoLike == 0) || !(Id.videoDislike == 1 && Id.videoLike == 0)) {
+                percent = Id.videoLike / (Id.videoDislike + Id.videoLike);
+                if (percent < 0.3) {
+                  Videos.remove(Id.videoId);
+                } else {
+                  Videos.update({
+                    _id: Id._id
+                  }, {
+                    $set: {
+                      videoStatus: "Tocando"
+                    }
+                  });
+                  label = true;
+                }
+              }
+            } else {
+              //Empty list
+              label = true;
+              Id = ({
+                videoId: "DID8g3sleTs",
+              });
+            }
+          } while (!label);
           //Load new video
+          console.log(Id)
           player.loadVideoById(Id.videoId)
         }
       }

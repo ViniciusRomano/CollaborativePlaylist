@@ -2,6 +2,13 @@
 
 body {
     justify-content: center;
+    display: flex;
+    min-height: 100vh;
+    flex-direction: column;
+}
+
+main {
+    flex: 1 0 auto;
 }
 
 #submit {
@@ -30,6 +37,16 @@ body {
     color: red
 }
 
+div.nav-wrapper {
+    margin-bottom: 50px;
+    overflow: auto;
+}
+
+ul.collapsible {
+    margin-top: 30px;
+    overflow: auto;
+}
+
 #numberlike {
     margin-right: -5px;
     margin-top: 35px;
@@ -38,4 +55,55 @@ body {
 
 .nav-wrapper {
     background-color: darkcyan;
+}
+
+footer.page-footer {
+    background-color: rgba(0, 0, 0, 0);
+    margin-bottom: 60px;
+}
+
+#help {
+    margin-right: 20px;
+}
+
+div.collapsible-header {
+    padding: 20px;
+    font-size: 16px;
+    font-family: Cabin;
+}
+
+div.collapsible-header:hover {
+    background-color: rgba(0, 130, 200, 0.30);
+    -webkit-transition: 1.5s;
+}
+
+div.collapsible-body {
+    padding: 20px;
+    font-family: Cabin;
+    font-size: 16px;
+}
+
+li.collection-item.avatar {
+    background-color: rgba(255, 0, 0, 0.2);
+}
+
+
+/*Responsive Lists*/
+
+@media only screen and (max-width: 601px) {
+    div.collapsible-header.two {
+        line-height: 1.7rem;
+    }
+}
+
+@media only screen and (max-width: 541px) {
+    div.collapsible-header.one {
+        line-height: 1.7rem;
+    }
+}
+
+@media only screen and (max-width: 460px) {
+    div.collapsible-header.three {
+        line-height: 1.7rem;
+    }
 }

@@ -9,48 +9,80 @@
 <body>
   <nav>
     <div class="nav-wrapper">
-      <a class="brand-logo center" style="font-family: 'Cabin'; text-align:center;">Playlist Colaborativa</a>
+      <a class="brand-logo center" style="font-family: 'Cabin'; text-align:center; font-size:23px;">Playlist Colaborativa</a>
+      <ul id="nav-mobile" class="right">
+        <a href="" id="help"><i class="material-icons">help</i></a>
+      </ul>
     </div>
   </nav>
   <br>
 </body>
 
 <template name="MainPage">
-  <div class="container">
-    <form class="new_video" autocomplete="off">
-      <div class="row">
-        <div class="col s12 m12 l9">
-          <div class="input-field">
-            <input type="text" name="link" class="validate" id="text_field"><br>
-            <label for="link">O que você gostaria de ouvir?</label>
+  <main>
+    <div class="container">
+      <form class="new_video" autocomplete="off">
+        <div class="row">
+          <div class="col s12 m12 l9">
+            <div class="input-field">
+              <input type="text" name="link" class="validate" id="text_field"><br>
+              <label for="link">O que você gostaria de ouvir?</label>
+            </div>
           </div>
-        </div>
-        <div class="col s12 center m12 center l3" style="margin-top:20px">
-          <button class="btn waves-effect waves-light text-center" type="submit" value="Submit" id="submit" href=".modal">Procurar
+          <div class="col s12 center m12 center l3" style="margin-top:20px">
+            <button class="btn waves-effect waves-light text-center" type="submit" value="Submit" id="submit" href=".modal">Procurar
           <i class="material-icons right">search</i>
         </button>
+          </div>
         </div>
-      </div>
-    </form>
-    <ul class="collection">
-      {{#each videos}}
-      <li class="collection-item avatar">
-        <img src={{videoThumb}} alt="" class="circle">
-        <div style="width:75%">
-          <span class="title">{{videoTitle}}</span>
-        </div>
-        <p>{{videoDuration}}<br>{{videoStatus}}
-        </p>
-        <a href="" class="secondary-content" id="like">{{#if like}} <i id ="L{{videoId}}" class="fa fa-thumbs-up fa-2x" aria-hidden="true"></i> {{else}} <i id ="L{{videoId}}" class="fa fa-thumbs-o-up fa-2x" aria-hidden="true"></i> {{/if}}</a>
-        <a href="" class="secondary-content" id="dislike">{{#if dislike}} <i id ="D{{videoId}}" class="fa fa-thumbs-down fa-2x" aria-hidden="true"></i> {{else}} <i id ="D{{videoId}}" class="fa fa-thumbs-o-down fa-2x" aria-hidden="true"></i> {{/if}}</a>
-        <a href="" class="secondary-content" id="numberdislike"><b>{{videoDislike}}</b></a>
-        <a href="" class="secondary-content" id="numberlike"><b>{{videoLike}}</b></a>
-      </li>
-      {{/each}}
-    </ul>
-  </div>
+      </form>
+      <ul class="collection">
+        {{#each videos}}
+        <li class="collection-item avatar">
+          <img src={{videoThumb}} alt="" class="circle">
+          <div style="width:75%">
+            <span class="title">{{videoTitle}}</span>
+          </div>
+          <p>{{videoDuration}}<br>{{videoStatus}}
+          </p>
+          <a href="" class="secondary-content" id="like">{{#if like}} <i id ="L{{videoId}}" class="fa fa-thumbs-up fa-2x" aria-hidden="true"></i> {{else}} <i id ="L{{videoId}}" class="fa fa-thumbs-o-up fa-2x" aria-hidden="true"></i> {{/if}}</a>
+          <a href="" class="secondary-content" id="dislike">{{#if dislike}} <i id ="D{{videoId}}" class="fa fa-thumbs-down fa-2x" aria-hidden="true"></i> {{else}} <i id ="D{{videoId}}" class="fa fa-thumbs-o-down fa-2x" aria-hidden="true"></i> {{/if}}</a>
+          <a href="" class="secondary-content" id="numberdislike"><b>{{videoDislike}}</b></a>
+          <a href="" class="secondary-content" id="numberlike"><b>{{videoLike}}</b></a>
+        </li>
+        {{/each}}
+      </ul>
+    </div>
+  </main>
 </template>
 
 <template name="player">
   <div id="player"></div>
+</template>
+
+<template name="Helpme">
+  <nav>
+    <div class="nav-wrapper">
+      <a class="brand-logo center" style="font-family: 'Cabin'; text-align:center; font-size:23px;">Dúvidas sobre o sistema?</a>
+    </div>
+  </nav>
+  <ul class="collapsible" data-collapsible="accordion">
+    <li>
+      <div class="collapsible-header one"><i class="material-icons">arrow_forward</i><b>Como faço para inserir músicas na playlist?</b></div>
+      <div class="collapsible-body"><span>Basta escrever a música que deseja escutar no campo de pesquisa, e apertar o botão "Procurar". Com isso, aparecerá uma lista de músicas possíveis a serem adicionadas na playlist. Escolha uma delas, clique no ícone no canto direito e confirme. Pronto, sua música foi inserida!</span></div>
+    </li>
+    <li>
+      <div class="collapsible-header two"><i class="material-icons">arrow_forward</i><b>Como funciona o sistema dos "Likes" e "Dislikes"?</b></div>
+      <div class="collapsible-body"><span>Para que possamos ter um ambiente mais justo, esse sistema conta com um sistema de votos a cada música. Se alguma música estiver com um número de "Deslikes" muito alto em relação aos "Likes", e estiver prestes a ser tocada, ela é automaticamente excluída da playlist.</span></div>
+    </li>
+    <li>
+      <div class="collapsible-header three"><i class="material-icons">arrow_forward</i><b>Posso colocar todo tipo do música?</b></div>
+      <div class="collapsible-body"><span>Sim, com exceções de músicas com duração maior que 10 minutos ou repetidas.</span></div>
+    </li>
+  </ul>
+  <script>
+    $(document).ready(function () {
+      $('.collapsible').collapsible();
+    });
+  </script>
 </template>
