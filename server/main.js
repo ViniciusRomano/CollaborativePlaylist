@@ -12,5 +12,6 @@ Meteor.startup(() => {
   Accounts.removeOldGuests();;
   AccountsGuest.anonymous = true
   AccountsGuest.name = true
+  // set permissions on user model
   Videos.remove({});
 });

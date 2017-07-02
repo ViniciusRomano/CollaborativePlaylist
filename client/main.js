@@ -16,6 +16,25 @@ Reactions = new Mongo.Collection('reactions');
 SearchList = new Array();
 // GLOBAL FUNCTIONS
 
+removeVideos = function (videoId) {
+  users = Meteor.users.find().fetch()
+  users.forEach(function (element, index) {
+    Meteor.users.update({
+      _id: element._id,
+    }, {
+      $pull: {
+        "profile.dislikes": videoId,
+        "profile.likes": videoId
+      }
+    }, function (error) {
+      if (error);
+    });
+  });
+  Videos.remove({
+    _id: videoId
+  })
+}
+
 convertDuration = function (duration) {
   var match = duration.match(/PT(\d+H)?(\d+M)?(\d+S)?/)
 
@@ -39,7 +58,6 @@ insertVideo = function (videoId, videoTitle, videoThumb) {
     videoStatus: "Na fila",
     videoLike: 0,
     videoDislike: 0,
-    videoPercent: 1
   }, function (error) {
     if (error) {
       //Duplicate music error
@@ -63,11 +81,7 @@ insertVideo = function (videoId, videoTitle, videoThumb) {
               $set: {
                 videoDuration: videoDuration,
               }
-            }, function (error) {
-              if (error) {
-                console.log(error)
-              }
-            })
+            });
             Materialize.toast('Musica inserida!', 2000, 'green');
           } else {
             Videos.remove(videoId);
@@ -179,7 +193,7 @@ Template.MainPage.events({
           "profile.likes": url,
         }
       }, function (error) {
-        if (error) console.log(error);
+        if (error);
       });
     } else {
       //like on
@@ -301,9 +315,7 @@ window.onYouTubeIframeAPIReady = function () {
         if (event.data == YT.PlayerState.ENDED) {
           // Remove video on database
           if (Id.videoId != "DID8g3sleTs") {
-            Videos.remove({
-              _id: Id._id
-            })
+            removeVideos(Id._id)
           }
 
           // Search new video
@@ -312,20 +324,20 @@ window.onYouTubeIframeAPIReady = function () {
             Id = Videos.findOne()
             var percent = 1;
             if (Id != undefined) {
-              if (!(Id.videoDislike == 0 && Id.videoLike == 0) || !(Id.videoDislike == 1 && Id.videoLike == 0)) {
+              if (!(Id.videoDislike == 0 && Id.videoLike == 0) && !(Id.videoDislike == 1 && Id.videoLike == 0)) {
                 percent = Id.videoLike / (Id.videoDislike + Id.videoLike);
-                if (percent < 0.3) {
-                  Videos.remove(Id.videoId);
-                } else {
-                  Videos.update({
-                    _id: Id._id
-                  }, {
-                    $set: {
-                      videoStatus: "Tocando"
-                    }
-                  });
-                  label = true;
-                }
+              }
+              if (percent < 0.3) {
+                removeVideos(Id.videoId);
+              } else {
+                Videos.update({
+                  _id: Id._id
+                }, {
+                  $set: {
+                    videoStatus: "Tocando"
+                  }
+                });
+                label = true;
               }
             } else {
               //Empty list
@@ -336,7 +348,6 @@ window.onYouTubeIframeAPIReady = function () {
             }
           } while (!label);
           //Load new video
-          console.log(Id)
           player.loadVideoById(Id.videoId)
         }
       }
